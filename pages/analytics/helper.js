@@ -18,7 +18,7 @@ import { __ } from '@wordpress/i18n';
  *
  * @return {string} A colour string, falling back to the GoDAM pink.
  */
-function getGodamAccent() {
+export function getGodamAccent() {
 	return (
 		getComputedStyle( document.body )
 			.getPropertyValue( '--wp-admin-theme-color' )

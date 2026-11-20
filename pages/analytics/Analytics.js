@@ -35,6 +35,7 @@ import PlaysVsViewers from './PlaysVsViewers.js';
 import PlaybackPerformanceDashboard from './PlaybackPerformance.js';
 import VideoLayerTimeline from './VideoLayerTimeline.js';
 import Placements from './components/Placements';
+import AudiencePanels from './components/Audience';
 import videojs from 'video.js';
 import { arrowLeft, info } from '@wordpress/icons';
 import { ERROR_TYPE } from '../shared/enums';
@@ -839,6 +840,8 @@ const Analytics = ( { attachmentID } ) => {
 							<div className="total-views" id="total-views"></div>
 						</div>
 					</div>
+
+					<AudiencePanels videoId={ attachmentID } siteUrl={ siteUrl } shouldSkip={ shouldSkipSecondaryQueries } />
 
 					<div className="px-10 py-6">
 						<div>

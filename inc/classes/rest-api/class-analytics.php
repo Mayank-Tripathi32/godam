@@ -279,6 +279,26 @@ class Analytics extends Base {
 			),
 			array(
 				'namespace' => $this->namespace,
+				'route'     => '/' . $this->rest_base . '/audience',
+				'args'      => array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'fetch_audience_breakdown' ),
+					'permission_callback' => array( $this, 'check_analytics_read_permission' ),
+					'args'                => array(
+						'video_id' => array(
+							'required'          => true,
+							'type'              => 'integer',
+							'description'       => __( 'The Video ID for fetching the audience breakdown.', 'godam' ),
+							'validate_callback' => function ( $param ) {
+								return is_numeric( $param ) && intval( $param ) > 0;
+							},
+							'sanitize_callback' => 'absint',
+						),
+					),
+				),
+			),
+			array(
+				'namespace' => $this->namespace,
 				'route'     => '/' . $this->rest_base . '/history',
 				'args'      => array(
 					'methods'             => WP_REST_Server::READABLE,
@@ -1259,6 +1279,97 @@ class Analytics extends Base {
 					'avg_engagement_change' => 0.0,
 					'post_details'          => array(),
 				),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Fetch the all-time audience breakdown (device, browser, referrer,
+	 * language, screen size) for a video from the external API securely.
+	 *
+	 * @param WP_REST_Request $request REST API request.
+	 * @return WP_REST_Response
+	 */
+	public function fetch_audience_breakdown( WP_REST_Request $request ) {
+		$video_id = $request->get_param( 'video_id' );
+		$site_url = rtgodam_get_request_site_origin( $request->get_param( 'site_url' ) );
+		if ( '' === $site_url ) {
+			return $this->site_origin_unavailable_response();
+		}
+
+		$account_token = get_option( 'rtgodam-account-token', 'unverified' );
+		$api_key       = get_option( 'rtgodam-api-key', '' );
+
+		// Check if API key is missing.
+		if ( empty( $api_key ) || empty( $account_token ) || 'unverified' === $account_token ) {
+			return new WP_REST_Response(
+				array(
+					'status'    => 'error',
+					'message'   => __( 'Missing API key.', 'godam' ),
+					'errorType' => 'missing_key',
+				),
+				200
+			);
+		}
+
+		// The breakdown is always all-time, so no range or store-offset params.
+		$audience_url = add_query_arg(
+			array(
+				'video_id'      => $video_id,
+				'site_url'      => $site_url,
+				'account_token' => $account_token,
+				'api_key'       => $api_key,
+			),
+			RTGODAM_ANALYTICS_BASE . '/processed-analytics/device-breakdown/'
+		);
+
+		$response = wp_remote_get( $audience_url );
+
+		if ( is_wp_error( $response ) ) {
+			return new WP_REST_Response(
+				array(
+					'status'    => 'error',
+					'message'   => __( 'Unable to reach analytics server.', 'godam' ),
+					'errorType' => 'microservice_error',
+				),
+				200
+			);
+		}
+
+		$data      = json_decode( wp_remote_retrieve_body( $response ), true );
+		$http_code = wp_remote_retrieve_response_code( $response );
+		$detail    = $data['detail'] ?? __( 'Unexpected error from analytics server.', 'godam' );
+
+		if ( 404 === $http_code || 400 === $http_code ) {
+			return new WP_REST_Response(
+				array(
+					'status'    => 'error',
+					'message'   => $detail,
+					'errorType' => 'invalid_key',
+				),
+				200
+			);
+		}
+
+		// Any other non-2xx (401, 403, 422, 5xx), or a 2xx whose body is not JSON (e.g. an HTML error page).
+		if ( $http_code < 200 || $http_code >= 300 || ! is_array( $data ) ) {
+			return new WP_REST_Response(
+				array(
+					'status'    => 'error',
+					'message'   => $detail,
+					'errorType' => 'microservice_error',
+				),
+				200
+			);
+		}
+
+		$keys = array( 'device_views', 'browser_views', 'traffic_views', 'language_views', 'resolution_views' );
+
+		return new WP_REST_Response(
+			array(
+				'status' => 'success',
+				'data'   => array_merge( array_fill_keys( $keys, array() ), $this->only_keys( $data, $keys ) ),
 			),
 			200
 		);

@@ -420,11 +420,12 @@ if ( ! function_exists( 'wp_remote_get' ) ) {
 
 	/**
 	 * @param string $url  Requested URL (recorded).
-	 * @param array  $args Ignored.
+	 * @param array  $args Request args (recorded).
 	 * @return mixed
 	 */
-	function wp_remote_get( $url, $args = array() ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed, WordPress.WP.AlternativeFunctions.wp_remote_get_wp_remote_get
-		$GLOBALS['rtgodam_stub']['last_remote_url'] = $url;
+	function wp_remote_get( $url, $args = array() ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.wp_remote_get_wp_remote_get
+		$GLOBALS['rtgodam_stub']['last_remote_url']  = $url;
+		$GLOBALS['rtgodam_stub']['last_remote_args'] = $args;
 		if ( isset( $GLOBALS['rtgodam_stub']['http'] ) ) {
 			return $GLOBALS['rtgodam_stub']['http'];
 		}

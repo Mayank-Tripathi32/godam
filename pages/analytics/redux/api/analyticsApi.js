@@ -19,6 +19,28 @@ const rangeParams = ( { startDate, endDate } = {} ) => ( {
 	...( endDate ? { end_date: endDate } : {} ),
 } );
 
+/**
+ * Same envelope handling as `fetchAnalyticsData`: an error envelope becomes a
+ * soft `{ errorType, message }`, any other non-success throws.
+ *
+ * @param {Object} response Proxy response from `godam/v1/analytics/audience`.
+ * @return {Object} The five `*_views` maps, or `{ errorType, message }`.
+ */
+export const transformAudienceResponse = ( response ) => {
+	if ( response.status === 'error' ) {
+		return {
+			errorType: response.errorType || 'unknown_error',
+			message: response.message,
+		};
+	}
+
+	if ( response.status !== 'success' ) {
+		throw new Error( response.message );
+	}
+
+	return response.data;
+};
+
 export const analyticsApi = createApi( {
 	reducerPath: 'analyticsApi',
 	baseQuery: fetchBaseQuery( {
@@ -114,6 +136,13 @@ export const analyticsApi = createApi( {
 				};
 			},
 		} ),
+		fetchAudienceBreakdown: builder.query( {
+			query: ( { videoId, siteUrl } ) => ( {
+				url: 'godam/v1/analytics/audience',
+				params: { video_id: videoId, site_url: siteUrl },
+			} ),
+			transformResponse: transformAudienceResponse,
+		} ),
 	} ),
 } );
 
@@ -121,4 +150,5 @@ export const {
 	useFetchAnalyticsDataQuery,
 	useFetchProcessedAnalyticsHistoryQuery,
 	useFetchProcessedLayerAnalyticsQuery,
+	useFetchAudienceBreakdownQuery,
 } = analyticsApi;

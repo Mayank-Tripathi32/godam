@@ -72,6 +72,7 @@ class AnalyticsRoutePermissionTest extends TestCase {
 	 */
 	const UPLOAD_FILES_ROUTES = array(
 		'/analytics/fetch',
+		'/analytics/audience',
 		'/analytics/history',
 		'/analytics/layer-analytics',
 	);

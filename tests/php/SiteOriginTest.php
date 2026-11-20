@@ -240,28 +240,29 @@ class SiteOriginTest extends TestCase {
 	 */
 	public function analytics_reads() {
 		return array(
-			'layer analytics'   => array(
+			'layer analytics'    => array(
 				'fetch_layer_analytics',
 				array(
 					'video_id'   => 7,
 					'layer_type' => 'cta',
 				),
 			),
-			'video analytics'   => array( 'fetch_analytics_data', array( 'video_id' => 7 ) ),
-			'video history'     => array(
+			'video analytics'    => array( 'fetch_analytics_data', array( 'video_id' => 7 ) ),
+			'audience breakdown' => array( 'fetch_audience_breakdown', array( 'video_id' => 7 ) ),
+			'video history'      => array(
 				'fetch_analytics_history',
 				array(
 					'video_id' => 7,
 					'days'     => 7,
 				),
 			),
-			'dashboard metrics' => array( 'fetch_dashboard_metrics', array() ),
-			'dashboard history' => array( 'fetch_dashboard_history', array( 'days' => 7 ) ),
-			'top videos'        => array( 'fetch_top_videos', array( 'search' => '' ) ),
-			'placement funnels' => array( 'fetch_placement_funnels', array() ),
-			'revenue summary'   => array( 'fetch_revenue_summary', array() ),
-			'video funnel'      => array( 'fetch_video_funnel', array() ),
-			'top products'      => array( 'fetch_top_products', array( 'search' => '' ) ),
+			'dashboard metrics'  => array( 'fetch_dashboard_metrics', array() ),
+			'dashboard history'  => array( 'fetch_dashboard_history', array( 'days' => 7 ) ),
+			'top videos'         => array( 'fetch_top_videos', array( 'search' => '' ) ),
+			'placement funnels'  => array( 'fetch_placement_funnels', array() ),
+			'revenue summary'    => array( 'fetch_revenue_summary', array() ),
+			'video funnel'       => array( 'fetch_video_funnel', array() ),
+			'top products'       => array( 'fetch_top_products', array( 'search' => '' ) ),
 		);
 	}
 

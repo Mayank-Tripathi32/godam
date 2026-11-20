@@ -17,6 +17,19 @@
 	  "@wordpress/dependency-group": "error"
 	},
 	"overrides": [{
+	  // Audience panels: enforce the text domain, and keep the data helpers free of DOM, d3 and React.
+	  "files": [ "pages/analytics/components/Audience/**/*.js" ],
+	  "rules": {
+		"@wordpress/i18n-text-domain": [ "error", { "allowedTextDomain": "godam" } ]
+	  }
+	}, {
+	  "files": [ "pages/analytics/components/Audience/audienceData.js" ],
+	  "globals": { "d3": "off", "document": "off", "window": "off" },
+	  "rules": {
+		"no-restricted-imports": [ "error", { "patterns": [ "react", "react-dom", "react-dom/*", "@wordpress/element", "d3", "d3-*" ] } ],
+		"no-restricted-globals": [ "error", "d3", "document", "window" ]
+	  }
+	}, {
 	  "files": [
 		"**/__tests__/**/*.js",
 		"**/test/*.js",
